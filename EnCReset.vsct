@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+  <Extern href="VSDbgCmd.h" />
+  <Extern href="VsDebugGuids.h" />
+
+  <Commands package="guidPackage">
+    <Groups>
+      <Group guid="guidCommandSet" id="ResetGroup" priority="0x0600">
+        <Parent guid="guidVSDebugGroup" id="IDM_DEBUG_MENU" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidCommandSet" id="ResetCommand" priority="0x0100" type="Button">
+        <Parent guid="guidCommandSet" id="ResetGroup" />
+        <Strings>
+          <ButtonText>Reset Edit &amp; Continue Tracking</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <Symbols>
+    <GuidSymbol name="guidPackage" value="{8d42c449-f2ea-4d7a-9430-b005cc3dad98}" />
+    <GuidSymbol name="guidCommandSet" value="{9368c0dd-26d4-4dd3-a5cc-1f4fd47bdabb}">
+      <IDSymbol name="ResetGroup" value="0x1020" />
+      <IDSymbol name="ResetCommand" value="0x0100" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
