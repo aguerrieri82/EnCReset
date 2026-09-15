@@ -38,3 +38,31 @@ msbuild EnCReset.csproj /restore /t:Rebuild /p:Configuration=Release /p:DeployEx
 ```
 
 The installer is generated at `bin/Release/net48/EnCReset.vsix`.
+## Publish a GitHub release
+
+Prerequisites: the build tools above, Git, and [GitHub CLI](https://cli.github.com/).
+Install the CLI with `winget install --id GitHub.cli`, reopen PowerShell, and authenticate once with `gh auth login`.
+
+1. Set the next version in `source.extension.vsixmanifest` (Identity Version).
+2. Commit and push all changes to GitHub.
+3. From the repository directory, run:
+
+```powershell
+.\Release.ps1
+```
+
+The script rebuilds Release, verifies the packaged version, creates a matching tag (for example `v1.1`) at the current commit, and publishes a release with generated notes and `EnCReset.vsix` attached. It requires a clean checkout and a commit already present on GitHub. Existing tags/releases are rejected; it does not overwrite assets or commit/push source changes.
+
+To verify the build without publishing (also works with uncommitted changes and without GitHub CLI):
+
+```powershell
+.\Release.ps1 -BuildOnly
+```
+
+To upload an unpublished draft for review:
+
+```powershell
+.\Release.ps1 -Draft
+```
+
+Publish that draft from GitHub when ready. If an upload fails after release creation, inspect the release on GitHub before retrying; the script does not overwrite a partial release. MSBuild is discovered automatically, or can be supplied with `-MSBuildPath 'C:\path\to\MSBuild.exe'`.
