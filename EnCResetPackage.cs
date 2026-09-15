@@ -2,6 +2,8 @@ using EnvDTE;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Settings;
+using Microsoft.VisualStudio.Shell.Settings;
 using System;
 using System.ComponentModel.Design;
 using System.Linq;
@@ -22,6 +24,13 @@ namespace EnCReset
         public const string PackageGuidString = "8d42c449-f2ea-4d7a-9430-b005cc3dad98";
         public const string CommandSetGuidString = "9368c0dd-26d4-4dd3-a5cc-1f4fd47bdabb";
         public const int CommandId = 0x0100;
+        public const int ToggleAutomaticResetCommandId = 0x0101;
+        const string SettingsCollection = "EnCReset";
+        const string AutomaticResetSetting = "AutomaticResetEnabled";
+
+        WritableSettingsStore _settingsStore;
+        bool _automaticResetEnabled = true;
+        int _automaticResetVersion;
 
         DebuggerEvents _debuggerEvents;
 
@@ -34,8 +43,23 @@ namespace EnCReset
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
+            var settingsManager = new ShellSettingsManager(this);
+            _settingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
+            if (_settingsStore.PropertyExists(SettingsCollection, AutomaticResetSetting))
+                _automaticResetEnabled = _settingsStore.GetBoolean(SettingsCollection, AutomaticResetSetting);
+
             var commandService = await GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
             commandService?.AddCommand(new MenuCommand((s, e) => Reset(), new CommandID(new Guid(CommandSetGuidString), CommandId)));
+
+            var automaticResetCommand = new OleMenuCommand(
+                (s, e) => ToggleAutomaticReset(),
+                new CommandID(new Guid(CommandSetGuidString), ToggleAutomaticResetCommandId));
+            automaticResetCommand.BeforeQueryStatus += (s, e) =>
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
+                automaticResetCommand.Checked = _automaticResetEnabled;
+            };
+            commandService?.AddCommand(automaticResetCommand);
 
             var dte = await GetServiceAsync(typeof(SDTE)) as DTE;
             _debuggerEvents = dte?.Events.DebuggerEvents;
@@ -44,15 +68,32 @@ namespace EnCReset
                 _debuggerEvents.OnEnterDesignMode += OnEnterDesignMode;
         }
 
+        void ToggleAutomaticReset()
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var enabled = !_automaticResetEnabled;
+            if (!_settingsStore.CollectionExists(SettingsCollection))
+                _settingsStore.CreateCollection(SettingsCollection);
+            _settingsStore.SetBoolean(SettingsCollection, AutomaticResetSetting, enabled);
+            _automaticResetEnabled = enabled;
+            _automaticResetVersion++;
+        }
+
         void OnEnterDesignMode(dbgEventReason reason)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
+            if (!_automaticResetEnabled)
+                return;
+
+            var version = _automaticResetVersion;
             JoinableTaskFactory.RunAsync(async delegate
             {
                 await Task.Delay(250);
                 await JoinableTaskFactory.SwitchToMainThreadAsync();
-                Reset();
+                if (_automaticResetEnabled && version == _automaticResetVersion)
+                    Reset();
             });
         }
 

@@ -17,6 +17,7 @@ For release notes and previous downloads, see [Releases](https://github.com/ague
 ## Usage
 
 - **Automatic:** 250 ms after Visual Studio returns to design mode, the extension checks for a remaining tracking session and calls Roslyn's internal `EndTracking()` if one exists.
+- **Toggle automatic reset:** select **Debug → Automatically Reset Edit & Continue Tracking**. A check mark means automatic reset is enabled (the default). Your choice is saved across Visual Studio restarts. Turning it off also cancels any pending delayed reset.
 - **Manual:** select **Debug → Reset Edit & Continue Tracking**.
 - **Confirmation:** after `EndTracking()` returns successfully, **Output → Debug** displays this line in bold green:
 

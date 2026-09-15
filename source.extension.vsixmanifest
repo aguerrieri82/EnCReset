@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011">
 	<Metadata>
-		<Identity Id="EnCReset.8d42c449-f2ea-4d7a-9430-b005cc3dad98" Version="1.0" Language="en-US" Publisher="Local" />
+		<Identity Id="EnCReset.8d42c449-f2ea-4d7a-9430-b005cc3dad98" Version="1.1" Language="en-US" Publisher="Local" />
 		<DisplayName>EnC Reset</DisplayName>
 		<Description xml:space="preserve">Workaround for stale Roslyn Edit and Continue active statement tracking sessions.</Description>
 	</Metadata>
